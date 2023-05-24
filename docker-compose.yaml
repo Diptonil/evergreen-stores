@@ -1,0 +1,74 @@
+version: '3'
+
+
+services:
+  redis-master:
+    image: redis:6.0-alpine
+    container_name: redis-master
+    volumes:
+      - ${PWD}/database/redis-master:/etc/redis/
+      - evergreen-stores-database:/data/
+    networks:
+      - evergreen-stores-network
+    command: redis-server /etc/redis/redis.conf
+
+  redis-slave-1:
+    image: redis:6.0-alpine
+    container_name: redis-slave-1
+    volumes:
+      - ${PWD}/database/redis-slave:/etc/redis/
+      - evergreen-stores-database:/data/
+    networks:
+      - evergreen-stores-network
+    command: redis-server /etc/redis/redis.conf
+    links:
+      - redis-master
+
+  redis-slave-2:
+    image: redis:6.0-alpine
+    container_name: redis-slave-2
+    volumes:
+      - ${PWD}/database/redis-slave:/etc/redis/
+      - evergreen-stores-database:/data/
+    networks:
+      - evergreen-stores-network
+    command: redis-server /etc/redis/redis.conf
+    links:
+      - redis-master
+
+  redis-sentinel-1:
+    build: database/redis-sentinel
+    depends_on:
+      - redis-master
+      - redis-slave-1
+      - redis-slave-2
+    networks:
+      - evergreen-stores-network
+
+  redis-sentinel-2:
+    build: database/redis-sentinel
+    depends_on:
+      - redis-master
+      - redis-slave-1
+      - redis-slave-2
+    networks:
+      - evergreen-stores-network
+
+  redis-sentinel-3:
+    build: database/redis-sentinel
+    depends_on:
+      - redis-master
+      - redis-slave-1
+      - redis-slave-2
+    networks:
+      - evergreen-stores-network
+
+
+volumes:
+  evergreen-stores-database:
+    external: true
+
+
+networks:
+  evergreen-stores-network:
+    external: true
