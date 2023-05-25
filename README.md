@@ -13,7 +13,7 @@
 
 - [Description](#description)
 - [Frameworks and Tools](#frameworks-and-tools)
-- [Architecture](#architecture)
+- [Architecture](#architecture) (write about Availibility and Scalability separately and how that is achieved)
 - [Data Persistence](#data-persistence)
 - [Data Security](#data-security)
 - [Prerequisites](#prerequisites)

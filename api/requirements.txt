@@ -17,3 +17,4 @@ python-dotenv==0.21.0
 pytz==2022.6
 six==1.16.0
 urllib3==1.26.13
+Werkzeug==2.3.4

@@ -2,25 +2,45 @@ version: '3'
 
 
 services:
+  api-1:
+    build: api
+    container_name: api-1
+    networks:
+      - evergreen-stores-network
+    env_file:
+      - .env
+
+  api-2:
+    build: api
+    container_name: api-2
+    networks:
+      - evergreen-stores-network
+    env_file:
+      - .env
+
   redis-master:
     image: redis:6.0-alpine
     container_name: redis-master
     volumes:
-      - ${PWD}/database/redis-master:/etc/redis/
+      - ${PWD}/database/redis-master:/etc/redis-config/
       - evergreen-stores-database:/data/
     networks:
       - evergreen-stores-network
-    command: redis-server /etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+    command: redis-server /etc/redis-config/redis.conf
 
   redis-slave-1:
     image: redis:6.0-alpine
     container_name: redis-slave-1
     volumes:
-      - ${PWD}/database/redis-slave:/etc/redis/
+      - ${PWD}/database/redis-slave:/etc/redis-config/
       - evergreen-stores-database:/data/
     networks:
       - evergreen-stores-network
-    command: redis-server /etc/redis/redis.conf
+    ports:
+      - "6380:6379"
+    command: redis-server /etc/redis-config/redis.conf
     links:
       - redis-master
 
@@ -28,40 +48,68 @@ services:
     image: redis:6.0-alpine
     container_name: redis-slave-2
     volumes:
-      - ${PWD}/database/redis-slave:/etc/redis/
+      - ${PWD}/database/redis-slave:/etc/redis-config/
       - evergreen-stores-database:/data/
+    ports:
+      - "6381:6379"
     networks:
       - evergreen-stores-network
-    command: redis-server /etc/redis/redis.conf
+    command: redis-server /etc/redis-config/redis.conf
     links:
       - redis-master
 
   redis-sentinel-1:
     build: database/redis-sentinel
+    container_name: redis-sentinel-1
+    networks:
+      - evergreen-stores-network
+    env_file:
+      - .env
+    volumes:
+      - "${PWD}/database/redis-sentinel:/etc/redis"
     depends_on:
       - redis-master
       - redis-slave-1
       - redis-slave-2
-    networks:
-      - evergreen-stores-network
 
   redis-sentinel-2:
     build: database/redis-sentinel
+    container_name: redis-sentinel-2
+    networks:
+      - evergreen-stores-network
+    env_file:
+      - .env
+    volumes:
+      - "${PWD}/database/redis-sentinel:/etc/redis"
     depends_on:
       - redis-master
       - redis-slave-1
       - redis-slave-2
-    networks:
-      - evergreen-stores-network
 
   redis-sentinel-3:
     build: database/redis-sentinel
+    container_name: redis-sentinel-3
+    networks:
+      - evergreen-stores-network
+    env_file:
+      - .env
+    volumes:
+      - "${PWD}/database/redis-sentinel:/etc/redis"
     depends_on:
       - redis-master
       - redis-slave-1
       - redis-slave-2
-    networks:
-      - evergreen-stores-network
+
+  # load-balancer:
+  #   build: load-balancer
+  #   container_name: nginx
+  #   networks:
+  #     - evergreen-stores-network
+  #   ports:
+  #     - "8080:80"
+  #   depends_on:
+  #     - api-1
+  #     - api-2
 
 
 volumes:
