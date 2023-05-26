@@ -16,7 +16,8 @@ class User(Resource):
         query_data = request.args.get('user')
         if self.redis_slave.exists("user_%s" % (query_data)) == 0:
             return Response("User does not exist.", status=400)
-        return Response(self.redis_slave.hgetall("user_%s" % (query_data)), status=200)
+        response = self.redis_slave.hgetall("user_%s" % (query_data))
+        return {"email": response[b"email"].decode(), "first_name": response[b"first_name"].decode(), "last_name": response[b"last_name"].decode()}, 200
 
     def post(self) -> Response:
         """To create users if they don't already exist."""
@@ -27,7 +28,7 @@ class User(Resource):
         self.redis_master.hset("user_%s" % (request_data["email"]), mapping={"email": request_data["email"], "first_name": request_data["first_name"], "last_name": request_data["last_name"]})
         return Response("User creation successful.", status=200)
         
-    def update(self) -> Response:
+    def put(self) -> Response:
         """To modify users if they exist."""
         request_data = request.json
         user_profile_errors(request_data)
