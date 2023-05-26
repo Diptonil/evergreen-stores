@@ -1,17 +1,19 @@
-FROM redis:6.0-alpine
+FROM redis:7.0-alpine
 
 ENV SENTINEL_QUORUM 2
-ENV SENTINEL_DOWN_AFTER 5000
-ENV SENTINEL_FAILOVER 60000
+ENV SENTINEL_DOWN_AFTER 1000
+ENV SENTINEL_FAILOVER 1000
 
-ADD sentinel.conf /etc/redis/sentinel.conf
+RUN mkdir -p /redis
 
-RUN chown redis:redis /etc/redis/sentinel.conf
+WORKDIR /redis
 
+COPY sentinel.conf .
 COPY sentinel-entrypoint.sh /usr/local/bin/
 
-RUN chmod +x /usr/local/bin/sentinel-entrypoint.sh
+RUN chown redis:redis /redis/* &amp;\
+    chmod +x /usr/local/bin/sentinel-entrypoint.sh
 
-EXPOSE 5000
+EXPOSE 26379
 
 ENTRYPOINT ["sentinel-entrypoint.sh"]
