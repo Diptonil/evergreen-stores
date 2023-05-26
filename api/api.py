@@ -18,7 +18,7 @@ redis_master = redis_sentinel.master_for(REDIS_MASTER_NAME, socket_timeout=REDIS
 redis_slave = redis_sentinel.slave_for(REDIS_MASTER_NAME, socket_timeout=REDIS_SOCKET_TIMEOUT)
 
 # User Resources
-api.add_resource(User, '/user', resource_class_kwargs={"redis_sentinel": redis_sentinel, "redis_master": redis_master, "redis_slave": redis_slave})
+api.add_resource(User, '/user', resource_class_kwargs={"redis_master": redis_master, "redis_slave": redis_slave})
 
 # Product Resources
 
