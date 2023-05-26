@@ -3,7 +3,7 @@ from flask_cors import CORS
 from flask_restful import Api
 from redis.sentinel import Sentinel
 
-from constants import SECRET_KEY, REDIS_MASTER_NAME, REDIS_SENTINEL, REDIS_SOCKET_TIMEOUT
+from constants import SECRET_KEY, HOST, PORT, REDIS_MASTER_NAME, REDIS_SENTINEL, REDIS_SOCKET_TIMEOUT
 from resources.products import Product
 from resources.users import User
 
@@ -24,4 +24,4 @@ api.add_resource(Product, '/product', resource_class_kwargs={"redis_master": red
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, host=HOST, port=PORT)

@@ -9,19 +9,46 @@ services:
       dockerfile: Dockerfile
     container_name: api-1
     networks:
-      - evergreen-stores-network
+      evergreen-stores-network:
+        ipv4_address: 172.20.0.2
+    ports:
+      - "5000:5000"
     env_file:
       - .env
+    environment:
+      - HOST=172.20.0.2
+      - PORT=5000
 
   api-2:
     image: evergreen-stores-api
     container_name: api-2
     networks:
-      - evergreen-stores-network
+      evergreen-stores-network:
+        ipv4_address: 172.20.0.3
+    ports:
+      - "5001:5001"
     env_file:
       - .env
+    environment:
+      - HOST=172.20.0.3
+      - PORT=5001
     depends_on:
       - api-1
+
+  load-balancer:
+    image: nginx:1.25.0-alpine
+    container_name: nginx
+    hostname: nginx
+    volumes:
+      - ./load-balancer/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      evergreen-stores-network:
+        ipv4_address: 172.20.0.4
+    ports:
+      - "8080:8080"
+    depends_on:
+      - api-1
+      - api-2
 
   redis-master:
     image: redis:7.0-alpine
@@ -31,7 +58,7 @@ services:
       - evergreen-stores-database:/data/
     networks:
       evergreen-stores-network:
-        ipv4_address: 172.20.0.4
+        ipv4_address: 172.20.0.5
     ports:
       - "6379:6379"
 
@@ -46,7 +73,7 @@ services:
       - evergreen-stores-database:/data/
     networks:
       evergreen-stores-network:
-        ipv4_address: 172.20.0.5
+        ipv4_address: 172.20.0.6
 
   redis-slave-2:
     image: redis:7.0-alpine
@@ -59,7 +86,7 @@ services:
       - evergreen-stores-database:/data/
     networks:
       evergreen-stores-network:
-        ipv4_address: 172.20.0.6
+        ipv4_address: 172.20.0.7
 
   redis-sentinel-1:
     image: redis-sentinel
@@ -72,7 +99,7 @@ services:
       - redis-master
     networks:
       evergreen-stores-network:
-        ipv4_address: 172.20.0.7
+        ipv4_address: 172.20.0.8
  
   redis-sentinel-2:
     image: redis-sentinel
@@ -82,7 +109,7 @@ services:
       - redis-master
     networks:
       evergreen-stores-network:
-        ipv4_address: 172.20.0.8
+        ipv4_address: 172.20.0.9
     depends_on:
       - redis-sentinel-1
  
@@ -94,7 +121,7 @@ services:
       - redis-master
     networks:
       evergreen-stores-network:
-        ipv4_address: 172.20.0.9
+        ipv4_address: 172.20.0.10
     depends_on:
       - redis-sentinel-1
 
