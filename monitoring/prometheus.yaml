@@ -5,6 +5,9 @@ global:
 rule_files:
   - alert.yaml
 
+remote_read:
+  - url: "http://172.20.0.13:9201/read"
+
 scrape_configs:
   - job_name: prometheus
     metrics_path: /metrics
@@ -23,29 +26,6 @@ scrape_configs:
       - targets: ['172.20.0.2:5000']
   - job_name: api-2
     static_configs:
-      - targets: ['172.20.0.3:5000']
-  - job_name: redis-master
-    metrics_path: /metrics
-    static_configs:
-      - targets: ['172.20.0.5:6379']
-  - job_name: redis-slave-1
-    metrics_path: /metrics
-    static_configs:
-      - targets: ['172.20.0.6:6379']
-  - job_name: redis-slave-2
-    metrics_path: /metrics
-    static_configs:
-      - targets: ['172.20.0.7:6379']
-  - job_name: redis-sentinel-1
-    metrics_path: /metrics
-    static_configs:
-      - targets: ['172.20.0.8:26379']
-  - job_name: redis-sentinel-2
-    metrics_path: /metrics
-    static_configs:
-      - targets: ['172.20.0.9:26379']
-  - job_name: redis-sentinel-3
-    metrics_path: /metrics
-    static_configs:
-      - targets: ['172.20.0.10:26379']
+      - targets: ['172.20.0.3:5001']
+
   

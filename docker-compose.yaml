@@ -18,6 +18,7 @@ services:
     environment:
       - HOST=172.20.0.2
       - PORT=5000
+    restart: unless-stopped
 
   api-2:
     image: evergreen-stores-api
@@ -34,6 +35,7 @@ services:
       - PORT=5001
     depends_on:
       - api-1
+    restart: unless-stopped
 
   load-balancer:
     image: nginx:1.25.0-alpine
@@ -49,6 +51,7 @@ services:
     depends_on:
       - api-1
       - api-2
+    restart: unless-stopped
 
   redis-master:
     image: redis:7.0-alpine
@@ -61,6 +64,7 @@ services:
         ipv4_address: 172.20.0.5
     ports:
       - "6379:6379"
+    restart: unless-stopped
 
   redis-slave-1:
     image: redis:7.0-alpine
@@ -74,6 +78,7 @@ services:
     networks:
       evergreen-stores-network:
         ipv4_address: 172.20.0.6
+    restart: unless-stopped
 
   redis-slave-2:
     image: redis:7.0-alpine
@@ -87,6 +92,7 @@ services:
     networks:
       evergreen-stores-network:
         ipv4_address: 172.20.0.7
+    restart: unless-stopped
 
   redis-sentinel-1:
     image: redis-sentinel
@@ -100,6 +106,7 @@ services:
     networks:
       evergreen-stores-network:
         ipv4_address: 172.20.0.8
+    restart: unless-stopped
  
   redis-sentinel-2:
     image: redis-sentinel
@@ -112,6 +119,7 @@ services:
         ipv4_address: 172.20.0.9
     depends_on:
       - redis-sentinel-1
+    restart: unless-stopped
  
   redis-sentinel-3:
     image: redis-sentinel
@@ -124,6 +132,7 @@ services:
         ipv4_address: 172.20.0.10
     depends_on:
       - redis-sentinel-1
+    restart: unless-stopped
 
   prometheus:
     image: prom/prometheus:latest
@@ -139,6 +148,7 @@ services:
       - "9090:9090"
     command:
     - "--config.file=/etc/prometheus/prometheus.yaml"
+    restart: unless-stopped
 
   grafana:
     image: grafana/grafana:latest
@@ -153,6 +163,23 @@ services:
       - "3000:3000"
     depends_on:
       - prometheus
+    restart: unless-stopped
+
+  redis-master-monitoring-adapter:
+    image: "redislabs/prometheus-redistimeseries-adapter:master"
+    container_name: redis-master-monitoring-adapter
+    hostname: redis-master-monitoring-adapter
+    command: ["-redis-address", "172.20.0.5:6379", "-web.listen-address", "172.20.0.13:9201"]
+    networks:
+      evergreen-stores-network:
+        ipv4_address: 172.20.0.13
+    ports:
+      - "9201:9201"
+    depends_on:
+      - prometheus
+      - redis-master
+    restart: unless-stopped
+
 
 volumes:
   evergreen-stores-database:
