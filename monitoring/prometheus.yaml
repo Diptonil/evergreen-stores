@@ -9,6 +9,43 @@ scrape_configs:
   - job_name: prometheus
     metrics_path: /metrics
     static_configs:
-      - targets:
-          - 'prometheus:9090'
-          - 'idonotexists:564'
+      - targets: ['172.20.0.11:9090']
+  - job_name: grafana
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['172.20.0.12:3000']
+  - job_name: nginx
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['172.20.0.4:8080']
+  - job_name: api-1
+    static_configs:
+      - targets: ['172.20.0.2:5000']
+  - job_name: api-2
+    static_configs:
+      - targets: ['172.20.0.3:5000']
+  - job_name: redis-master
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['172.20.0.5:6379']
+  - job_name: redis-slave-1
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['172.20.0.6:6379']
+  - job_name: redis-slave-2
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['172.20.0.7:6379']
+  - job_name: redis-sentinel-1
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['172.20.0.8:26379']
+  - job_name: redis-sentinel-2
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['172.20.0.9:26379']
+  - job_name: redis-sentinel-3
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['172.20.0.10:26379']
+  

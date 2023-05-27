@@ -125,9 +125,41 @@ services:
     depends_on:
       - redis-sentinel-1
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    hostname: prometheus
+    volumes:
+      - evergreen-stores-monitoring-metrics:/prometheus
+      - ./monitoring/prometheus.yaml:/etc/prometheus/prometheus.yaml
+    networks:
+      evergreen-stores-network:
+        ipv4_address: 172.20.0.11
+    ports:
+      - "9090:9090"
+    command:
+    - "--config.file=/etc/prometheus/prometheus.yaml"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    hostname: grafana
+    volumes:
+      - evergreen-stores-monitoring-visualization:/var/lib/grafana
+    networks:
+      evergreen-stores-network:
+        ipv4_address: 172.20.0.12
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
 
 volumes:
   evergreen-stores-database:
+    external: true
+  evergreen-stores-monitoring-metrics:
+    external: true
+  evergreen-stores-monitoring-visualization:
     external: true
 
 
